@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rekap Perilaku Siswa</title>
+
+<style>
+body{font-family:Arial;margin:0;background:#f4f6f9;}
+.header{background:#007BFF;color:white;padding:12px;text-align:center;font-size:20px;}
+.container{padding:8px;}
+.card{background:white;padding:10px;margin-bottom:10px;border-radius:10px;}
+select,input{width:100%;padding:10px;margin:5px 0;font-size:18px;}
+button{width:100%;padding:6px;margin:2px 0;font-size:12px;border:none;border-radius:5px;cursor:pointer;}
+.btn-save{background:#28a745;color:white;}
+.btn-edit{background:#ffc107;}
+.btn-clear{background:#dc3545;color:white;}
+.btn-download{background:#007BFF;color:white;}
+.active{border:3px solid black;}
+.table-container{overflow-x:auto;}
+table{min-width:1200px;border-collapse:collapse;}
+th,td{border:1px solid #ddd;padding:5px;font-size:12px;text-align:center;}
+th{background:#007BFF;color:white;}
+.kelas-box{display:flex;flex-wrap:wrap;}
+.kelas-box label{width:33%;}
+.rank-terbaik{background:#d4edda;}
+.rank-terburuk{background:#f8d7da;}
+</style>
+</head>
+
+<body>
+
+<div class="header">REKAP PERILAKU SISWA</div>
+
+<div class="container">
+
+<div class="card">
+
+<select id="kelas" onchange="render()">
+<option>7A</option>
+<option>7B</option>
+</select>
+
+<input id="tgl" type="number" min="1" max="31">
+
+<button class="btn-save" onclick="save()">Simpan</button>
+<button class="btn-edit" onclick="editMode()">Edit</button>
+<button class="btn-clear" onclick="clearData()">Bersihkan</button>
+
+<div class="kelas-box">
+<label><input type="checkbox" value="7A" class="kelasDownload">7A</label>
+<label><input type="checkbox" value="7B" class="kelasDownload">7B</label>
+</div>
+
+<button class="btn-download" onclick="downloadCSV()">Download</button>
+
+</div>
+
+<div class="card">
+
+<div class="table-container">
+<table>
+<thead>
+<tr>
+<th>No</th>
+<th>Nama</th>
+<th>Ngobrol</th>
+<th>Tidur</th>
+<th>Bercanda</th>
+<th>Berparas</th>
+<th>Makan</th>
+<th>Ke Belakang</th>
+<th>Beli Pulpen</th>
+<th>Ijin Kegiatan</th>
+<th>Aktif</th>
+<th>Disiplin</th>
+</tr>
+</thead>
+<tbody id="tbody"></tbody>
+</table>
+</div>
+
+<div id="rekapHarian" style="font-weight:bold;"></div>
+<div id="ranking"></div>
+
+</div>
+
+</div>
+
+<script>
+
+var edit = true;
+
+var dataSiswa = [
+{kelas:"7A",no:1,nama:"Achmad",absensi:{}},
+{kelas:"7A",no:2,nama:"Adam",absensi:{}},
+{kelas:"7B",no:1,nama:"Yahya",absensi:{}},
+{kelas:"7B",no:2,nama:"Aiman",absensi:{}}
+];
+
+// SAVE
+function save(){
+localStorage.setItem("absen", JSON.stringify(dataSiswa));
+alert("Data tersimpan ✅");
+}
+
+// LOAD
+function load(){
+let d = localStorage.getItem("absen");
+if(d) dataSiswa = JSON.parse(d);
+}
+
+// EDIT
+function editMode(){
+edit = !edit;
+alert(edit ? "Mode Edit Aktif" : "Nonaktif");
+}
+
+// CLEAR
+function clearData(){
+if(confirm("Hapus semua data?")){
+dataSiswa.forEach(d=>d.absensi={});
+save();
+render();
+}
+}
+
+// RENDER
+function render(){
+
+let k = kelas.value;
+let t = tgl.value;
+if(!t) return;
+
+let tbody="";
+
+let ngobrol=0,tidur=0,bercanda=0,berparas=0,makan=0,kb=0,bp=0,ik=0,aktif=0,disiplin=0;
+
+dataSiswa.forEach((d,i)=>{
+
+if(d.kelas==k){
+
+let st = d.absensi[t] || {};
+
+ngobrol += st["Ngobrol"] || 0;
+tidur += st["Tidur"] || 0;
+bercanda += st["Bercanda"] || 0;
+berparas += st["Berparas"] || 0;
+makan += st["Makan"] || 0;
+kb += st["Ke Belakang"] || 0;
+bp += st["Beli Pulpen"] || 0;
+ik += st["Ijin Kegiatan"] || 0;
+aktif += st["Aktif"] || 0;
+disiplin += st["Disiplin"] || 0;
+
+tbody+=`
+<tr>
+<td>${d.no}</td>
+<td>${d.nama}</td>
+
+<td><button class="${st['Ngobrol']?'active':''}" onclick="set(${i},'Ngobrol')">(${st['Ngobrol']||0})</button></td>
+<td><button class="${st['Tidur']?'active':''}" onclick="set(${i},'Tidur')">(${st['Tidur']||0})</button></td>
+<td><button class="${st['Bercanda']?'active':''}" onclick="set(${i},'Bercanda')">(${st['Bercanda']||0})</button></td>
+<td><button class="${st['Berparas']?'active':''}" onclick="set(${i},'Berparas')">(${st['Berparas']||0})</button></td>
+<td><button class="${st['Makan']?'active':''}" onclick="set(${i},'Makan')">(${st['Makan']||0})</button></td>
+<td><button class="${st['Ke Belakang']?'active':''}" onclick="set(${i},'Ke Belakang')">(${st['Ke Belakang']||0})</button></td>
+<td><button class="${st['Beli Pulpen']?'active':''}" onclick="set(${i},'Beli Pulpen')">(${st['Beli Pulpen']||0})</button></td>
+<td><button class="${st['Ijin Kegiatan']?'active':''}" onclick="set(${i},'Ijin Kegiatan')">(${st['Ijin Kegiatan']||0})</button></td>
+<td><button class="${st['Aktif']?'active':''}" onclick="set(${i},'Aktif')">(${st['Aktif']||0})</button></td>
+<td><button class="${st['Disiplin']?'active':''}" onclick="set(${i},'Disiplin')">(${st['Disiplin']||0})</button></td>
+
+</tr>`;
+}
+
+});
+
+document.getElementById("tbody").innerHTML = tbody;
+
+// REKAP
+document.getElementById("rekapHarian").innerHTML =
+"Tanggal "+t+
+" → Ngobrol:"+ngobrol+
+" | Tidur:"+tidur+
+" | Bercanda:"+bercanda+
+" | Berparas:"+berparas+
+" | Makan:"+makan+
+" | Ke Belakang:"+kb+
+" | Beli Pulpen:"+bp+
+" | Ijin Kegiatan:"+ik+
+" | Aktif:"+aktif+
+" | Disiplin:"+disiplin;
+
+hitungRanking(k);
+
+}
+
+// SET
+function set(i,status){
+if(!edit){ alert("Aktifkan mode edit!"); return;}
+let t=tgl.value;
+if(!dataSiswa[i].absensi[t]) dataSiswa[i].absensi[t]={};
+let obj=dataSiswa[i].absensi[t];
+obj[status]=(obj[status]||0)+1;
+render();
+}
+
+// RANKING
+function hitungRanking(k){
+
+let data = dataSiswa.filter(d=>d.kelas==k).map(d=>{
+
+let skor = 0;
+
+for(let t=1;t<=31;t++){
+
+let st = d.absensi[t] || {};
+
+// NEGATIF
+skor -= (st["Ngobrol"]||0)*1;
+skor -= (st["Tidur"]||0)*2;
+skor -= (st["Bercanda"]||0)*1;
+skor -= (st["Berparas"]||0)*1;
+skor -= (st["Makan"]||0)*1;
+
+// POSITIF
+skor += (st["Aktif"]||0)*2;
+skor += (st["Disiplin"]||0)*2;
+
+}
+
+return {...d,skor};
+
+});
+
+data.sort((a,b)=>b.skor-a.skor);
+
+let rank=1;
+data.forEach((d,i)=>{
+if(i>0 && d.skor < data[i-1].skor) rank++;
+d.rank=rank;
+});
+
+let html="<br><b>Ranking Siswa</b><div class='table-container'><table>";
+html+="<tr><th>Rank</th><th>Nama</th><th>Skor</th><th>Keterangan</th></tr>";
+
+data.forEach(d=>{
+
+let ket="";
+
+// nilai sikap
+if(d.skor > 5){ ket="⭐ Sangat Baik";}
+else if(d.skor > 0){ ket="✅ Baik";}
+else if(d.skor == 0){ ket="⚖ Netral";}
+else{ ket="⚠ Perlu Pembinaan"; }
+
+// label ranking
+if(d.rank==1){ ket+=" | 🏆 Terbaik";}
+if(d.rank==data[data.length-1].rank){ ket+=" | ⚠ Terburuk";}
+
+let cls="";
+if(d.rank==1) cls="rank-terbaik";
+if(d.rank==data[data.length-1].rank) cls="rank-terburuk";
+
+html+=`<tr class="${cls}">
+<td>${d.rank}</td>
+<td>${d.nama}</td>
+<td>${d.skor}</td>
+<td>${ket}</td>
+</tr>`;
+});
+
+html+="</table></div>";
+document.getElementById("ranking").innerHTML=html;
+}
+
+// DOWNLOAD
+function downloadCSV(){
+
+let kelasDipilih=[];
+document.querySelectorAll(".kelasDownload:checked")
+.forEach(cb=>kelasDipilih.push(cb.value));
+
+if(kelasDipilih.length===0){
+alert("Pilih kelas dulu!");
+return;
+}
+
+let csv="DATA PERILAKU SISWA\n";
+
+kelasDipilih.forEach(k=>{
+csv+="\nKELAS "+k+"\n";
+csv+="NO;NAMA;TANGGAL;PERILAKU\n";
+
+dataSiswa.filter(d=>d.kelas==k).forEach(d=>{
+for(let t=1;t<=31;t++){
+let st=d.absensi[t]||{};
+let teks=[];
+for(let key in st){
+teks.push(key+" ("+st[key]+")");
+}
+if(teks.length>0){
+csv+=`${d.no};${d.nama};${t};${teks.join(", ")}\n`;
+}
+}
+});
+});
+
+Android.downloadCSV(csv);
+}
+
+// START
+window.onload=function(){
+load();
+tgl.value=new Date().getDate();
+render();
+}
+
+</script>
+</body>
+</html>
