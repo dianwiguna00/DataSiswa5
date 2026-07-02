@@ -6,25 +6,204 @@
 <title>Rekap Perilaku Siswa</title>
 
 <style>
-body{font-family:Arial;margin:0;background:#f4f6f9;}
-.header{background:#007BFF;color:white;padding:12px;text-align:center;font-size:20px;}
-.container{padding:8px;}
-.card{background:white;padding:10px;margin-bottom:10px;border-radius:10px;}
-select,input{width:100%;padding:10px;margin:5px 0;font-size:18px;}
-button{width:100%;padding:6px;margin:2px 0;font-size:12px;border:none;border-radius:5px;cursor:pointer;}
-.btn-save{background:#28a745;color:white;}
-.btn-edit{background:#ffc107;}
-.btn-clear{background:#dc3545;color:white;}
-.btn-download{background:#007BFF;color:white;}
-.active{border:3px solid black;}
-.table-container{overflow-x:auto;}
-table{min-width:1200px;border-collapse:collapse;}
-th,td{border:1px solid #ddd;padding:5px;font-size:12px;text-align:center;}
-th{background:#007BFF;color:white;}
-.kelas-box{display:flex;flex-wrap:wrap;}
-.kelas-box label{width:33%;}
-.rank-terbaik{background:#d4edda;}
-.rank-terburuk{background:#f8d7da;}
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-size:20px;
+}
+
+
+body{
+    font-family:'Segoe UI',Tahoma,sans-serif;
+    background:#eef2f7;
+    color:#333;
+}
+
+.header{
+    background:linear-gradient(135deg,#0d6efd,#0a58ca);
+    color:white;
+    padding:20px;
+    text-align:center;
+    font-size:24px;
+    font-weight:600;
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+}
+
+.container{
+    max-width:1400px;
+    margin:auto;
+    padding:20px;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    margin-bottom:20px;
+    border-radius:16px;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+select,input{
+    width:100%;
+    padding:12px;
+    margin:6px 0;
+    border:1px solid #d6dce5;
+    border-radius:10px;
+    font-size:14px;
+}
+
+select:focus,
+input:focus{
+    outline:none;
+    border-color:#0d6efd;
+    box-shadow:0 0 0 3px rgba(13,110,253,.15);
+}
+
+button{
+    width:100%;
+    padding:10px;
+    margin:4px 0;
+    border:none;
+    border-radius:10px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.3s;
+}
+
+button:hover{
+    transform:translateY(-2px);
+}
+
+.btn-save{
+    background:#198754;
+    color:white;
+}
+
+.btn-edit{
+    background:#ffc107;
+    color:black;
+}
+
+.btn-clear{
+    background:#dc3545;
+    color:white;
+}
+
+.btn-download{
+    background:#0d6efd;
+    color:white;
+}
+
+.active{
+    border:3px solid black;
+}
+
+.stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+    gap:15px;
+    margin-bottom:20px;
+}
+
+.stat-card{
+    background:white;
+    padding:20px;
+    border-radius:16px;
+    text-align:center;
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
+}
+
+.stat-card h2{
+    font-size:32px;
+    color:#0d6efd;
+}
+
+.stat-card p{
+    color:#666;
+}
+
+.kelas-box{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(80px,1fr));
+    gap:8px;
+    margin-top:15px;
+}
+
+.kelas-box label{
+    background:#f8f9fa;
+    border:1px solid #ddd;
+    border-radius:10px;
+    padding:10px;
+}
+
+.table-container{
+    overflow:auto;
+    border-radius:12px;
+}
+
+table{
+    width:100%;
+    min-width:1200px;
+    border-collapse:collapse;
+}
+
+th{
+    background:#0d6efd;
+    color:white;
+    padding:12px;
+    position:sticky;
+    top:0;
+}
+
+td{
+    padding:10px;
+    border-bottom:1px solid #eee;
+    text-align:center;
+}
+
+tr:nth-child(even){
+    background:#f8f9fa;
+}
+
+tr:hover{
+    background:#e9f2ff;
+}
+
+.rank-terbaik{
+    background:#d1e7dd !important;
+}
+
+.rank-terburuk{
+    background:#f8d7da !important;
+}
+
+#rekapHarian{
+    margin-top:15px;
+    padding:15px;
+    background:#e9f2ff;
+    border-radius:10px;
+    font-weight:bold;
+}
+
+#ranking{
+    margin-top:20px;
+}
+
+.footer{
+    text-align:center;
+    padding:20px;
+    color:#777;
+    font-size:13px;
+}
+
+@media(max-width:768px){
+
+    .header{
+        font-size:20px;
+    }
+
+}
 </style>
 </head>
 
@@ -33,6 +212,30 @@ th{background:#007BFF;color:white;}
 <div class="header">REKAP PERILAKU SISWA</div>
 
 <div class="container">
+
+<div class="stats">
+
+    <div class="stat-card">
+        <h2 id="jmlAktif">0</h2>
+        <p>Aktif</p>
+    </div>
+
+    <div class="stat-card">
+        <h2 id="jmlDisiplin">0</h2>
+        <p>Disiplin</p>
+    </div>
+
+    <div class="stat-card">
+        <h2 id="jmlNgobrol">0</h2>
+        <p>Ngobrol</p>
+    </div>
+
+    <div class="stat-card">
+        <h2 id="jmlTidur">0</h2>
+        <p>Tidur</p>
+    </div>
+
+</div>
 
 <div class="card">
 
@@ -189,7 +392,10 @@ document.getElementById("rekapHarian").innerHTML =
 " | Ijin Kegiatan:"+ik+
 " | Aktif:"+aktif+
 " | Disiplin:"+disiplin;
-
+document.getElementById("jmlAktif").innerText = aktif;
+document.getElementById("jmlDisiplin").innerText = disiplin;
+document.getElementById("jmlNgobrol").innerText = ngobrol;
+document.getElementById("jmlTidur").innerText = tidur;
 hitungRanking(k);
 
 }
@@ -316,5 +522,8 @@ render();
 }
 
 </script>
+<div class="footer">
+© 2026 Sistem Rekap Perilaku Peserta Didik
+</div>
 </body>
 </html>
